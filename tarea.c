@@ -6,6 +6,35 @@ typedef struct {
     char fecha_limite[11]; // Formato YYYY-MM-DD
 } Tarea;
 
+void guardarTareas(Tarea tareas[], int numTareas) {
+    FILE *file = fopen("tareas.txt", "w");
+    if (!file) {
+        printf("Error al abrir el archivo para escritura.\n");
+        return;
+    }
+    for (int i = 0; i < numTareas; i++) {
+        fprintf(file, "%s%s%s", tareas[i].titulo, tareas[i].descripcion, tareas[i].fecha_limite);
+    }
+    fclose(file);
+}
+
+int cargarTareas(Tarea tareas[]) {
+    int numTareas = 0;
+    FILE *file = fopen("tareas.txt", "r");
+    if (!file) {
+        // Si no podemos abrir el archivo, no se carga nada
+        return 0;
+    }
+    while (!feof(file) && numTareas < 100) {
+        fgets(tareas[numTareas].titulo, sizeof(tareas[numTareas].titulo), file);
+        fgets(tareas[numTareas].descripcion, sizeof(tareas[numTareas].descripcion), file);
+        fgets(tareas[numTareas].fecha_limite, sizeof(tareas[numTareas].fecha_limite), file);
+        numTareas++;
+    }   
+    fclose(file);
+    return numTareas;
+}
+
 void agregarTarea(Tarea tareas[], int *numTareas) {
     printf("Introduce el título de la tarea: ");
     fgets(tareas[*numTareas].titulo, sizeof(tareas[*numTareas].titulo), stdin);
@@ -66,7 +95,7 @@ void editarTarea(Tarea tareas[], int numTareas) {
 
 int main() {
     Tarea tareas[100];
-    int numTareas = 0;
+    int numTareas = cargarTareas(tareas); //Cargar tareas
     int opcion;
 
     do {
@@ -76,7 +105,7 @@ int main() {
         printf("3. Eliminar tarea\n");
         printf("4. Editar tarea\n");
         printf("5. Salir\n");
-        printf("Selecciona una opción: ");
+        printf("Selecciona una opción: \n");
         scanf("%d", &opcion);
         getchar();  // Limpiar buffer
 
@@ -96,6 +125,8 @@ int main() {
         }
 
     } while(opcion != 5);
+
+    guardarTareas(tareas, numTareas); //Guardar tareas
 
     return 0;
 }
